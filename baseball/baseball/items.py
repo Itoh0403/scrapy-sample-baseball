@@ -35,6 +35,9 @@ class BatterItem(Item):
     ba = Field()        # 打率
     slg = Field()       # 長打率
     obp = Field()       # 出塁率
+    ops = Field()       # OPS
+    rc = Field()        # Runs Created
+    rc27 = Field()      # Runs Created per 27 outs
 
 
 class PitcherItem(Item):

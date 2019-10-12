@@ -8,12 +8,14 @@
 import sqlite3
 from scrapy.exceptions import DropItem
 
+import mysql.connector
+import os
 
 class BaseballPipeline(object):
 
     CREATE_TABLE_BATTER ="""
-    CREATE TABLE batter (
-      id integer primary key,
+    CREATE TABLE if not exists batter (
+      id integer auto_increment primary key,
       year integer,
       name text ,
       team text ,
@@ -23,7 +25,7 @@ class BaseballPipeline(object):
       ab integer ,
       r integer ,
       h integer ,
-      double integer ,
+      doub integer ,
       triple integer ,
       hr integer ,
       tb integer ,
@@ -40,14 +42,17 @@ class BaseballPipeline(object):
       ba real ,
       slg real ,
       obp real,
+      ops real,
+      rc real,
+      rc27 real,
       create_date date,
       update_date date
     ) 
     """
 
     CREATE_TABLE_PITCHER ="""
-    CREATE TABLE pitcher (
-      id integer primary key,
+    CREATE TABLE if not exists pitcher (
+      id integer auto_increment primary key,
       year integer,
       name text ,
       team text ,
@@ -91,7 +96,7 @@ class BaseballPipeline(object):
     ab, 
     r, 
     h, 
-    double, 
+    doub, 
     triple, 
     hr, 
     tb, 
@@ -108,13 +113,16 @@ class BaseballPipeline(object):
     ba,
     slg,
     obp,
+    ops,
+    rc,
+    rc27,
     create_date,
     update_date
     ) 
     values(
-    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, 
-    datetime('now', 'localtime'), 
-    datetime('now', 'localtime')
+    %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+    now(), 
+    now()
     )
     """
 
@@ -151,32 +159,44 @@ class BaseballPipeline(object):
     update_date
     ) 
     values(
-    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, 
-    datetime('now', 'localtime'), 
-    datetime('now', 'localtime')
+    %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, 
+    now(), 
+    now()
     )
     """
 
-    DATABASE_NAME = 'baseball.db'
+    DATABASE_NAME = 'baseball'
+    DATABASE_USER = os.environ.get('MYSQL_USER')
+    DATABASE_PASSWORD = os.environ.get('MYSQL_PASSWORD')
     conn = None
 
     def __init__(self):
         """
         Tableの有無をチェック,無ければ作る
         """
-        conn = sqlite3.connect(self.DATABASE_NAME)
-        if conn.execute("select count(*) from sqlite_master where name='batter'").fetchone()[0] == 0:
-            conn.execute(self.CREATE_TABLE_BATTER)
-        if conn.execute("select count(*) from sqlite_master where name='pitcher'").fetchone()[0] == 0:
-            conn.execute(self.CREATE_TABLE_PITCHER)
-        conn.close()
+        conn = mysql.connector.connect(username=self.DATABASE_USER, password=self.DATABASE_PASSWORD,
+                                       host='localhost')
+        cursor = conn.cursor(buffered=True)
+        try:
+            cursor.execute("create database if not exists {} default character set 'utf8'".format(self.DATABASE_NAME))
+            cursor.execute("use {}".format(self.DATABASE_NAME))
+        except mysql.connector.Error as err:
+            print(err)
+
+        if cursor.execute("show tables like 'batter';") is None:
+            cursor.execute(self.CREATE_TABLE_BATTER)
+        if cursor.execute("show tables like 'pitcher';") is None:
+            cursor.execute(self.CREATE_TABLE_PITCHER)
+        cursor.close()
 
     def open_spider(self, spider):
         """
         初期処理(DBを開く)
         :param spider: ScrapyのSpiderオブジェクト
         """
-        self.conn = sqlite3.connect(self.DATABASE_NAME)
+        self.conn = mysql.connector.connect(username=self.DATABASE_USER, password=self.DATABASE_PASSWORD,
+                                       host='localhost', database=self.DATABASE_NAME)
+        self.cursor = self.conn.cursor(buffered=True)
 
     def process_item(self, item, spider):
         """
@@ -188,15 +208,15 @@ class BaseballPipeline(object):
         # Spiderの名前で投入先のテーブルを判断
         if spider.name == 'batter':
             # 打者成績
-            self.conn.execute(self.INSERT_BATTER,(
+            self.cursor.execute(self.INSERT_BATTER,(
                 item['year'], item['name'], item['team'], item['bat'], item['games'], item['pa'], item['ab'], item['r'],
                 item['h'], item['double'], item['triple'], item['hr'], item['tb'], item['rbi'], item['so'], item['bb'],
                 item['ibb'], item['hbp'], item['sh'], item['sf'], item['sb'], item['cs'], item['dp'], item['ba'],
-                item['slg'], item['obp'],
+                item['slg'], item['obp'], item['ops'], item['rc'], item['rc27'],
             ))
         elif spider.name == 'pitcher':
             # 投手成績
-            self.conn.execute(self.INSERT_PITCHER,(
+            self.cursor.execute(self.INSERT_PITCHER,(
                 item['year'], item['name'], item['team'], item['throw'], item['games'], item['w'], item['l'],
                 item['sv'], item['hld'], item['hp'], item['cg'], item['sho'], item['non_bb'], item['w_per'], item['bf'],
                 item['ip'], item['h'], item['hr'], item['bb'], item['ibb'], item['hbp'], item['so'], item['wp'],
@@ -212,4 +232,5 @@ class BaseballPipeline(object):
         終了処理(DBを閉じる)
         :param spider: ScrapyのSpiderオブジェクト
         """
+        self.cursor.close()
         self.conn.close()

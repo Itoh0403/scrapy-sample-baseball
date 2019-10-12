@@ -15,7 +15,7 @@ TEAMS = {
     'm': 'marines',
     'l': 'lions',
     'e': 'eagles',
-    'bs': 'buffalos',
+    'b': 'buffalos',
     'c': 'carp',
     'g': 'giants',
     'db': 'baystars',
