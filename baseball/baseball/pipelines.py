@@ -25,6 +25,7 @@ class BaseballPipeline(object):
       ab integer ,
       r integer ,
       h integer ,
+      single integer ,
       doub integer ,
       triple integer ,
       hr integer ,
@@ -96,6 +97,7 @@ class BaseballPipeline(object):
     ab, 
     r, 
     h, 
+    single, 
     doub, 
     triple, 
     hr, 
@@ -166,8 +168,13 @@ class BaseballPipeline(object):
     """
 
     DATABASE_NAME = 'baseball'
+    # DATABASE_NAME = os.environ.get('DB_NAME')
     DATABASE_USER = os.environ.get('MYSQL_USER')
+    # DATABASE_USER = os.environ.get('DB_USER')
     DATABASE_PASSWORD = os.environ.get('MYSQL_PASSWORD')
+    # DATABASE_PASSWORD = os.environ.get('DB_PASSWORD')
+    DATABASE_HOST = 'localhost'
+    # DATABASE_HOST = os.environ.get('DB_HOSTNAME')
     conn = None
 
     def __init__(self):
@@ -175,7 +182,7 @@ class BaseballPipeline(object):
         Tableの有無をチェック,無ければ作る
         """
         conn = mysql.connector.connect(username=self.DATABASE_USER, password=self.DATABASE_PASSWORD,
-                                       host='localhost')
+                                       host=self.DATABASE_HOST)
         cursor = conn.cursor(buffered=True)
         try:
             cursor.execute("create database if not exists {} default character set 'utf8'".format(self.DATABASE_NAME))
@@ -195,12 +202,12 @@ class BaseballPipeline(object):
         :param spider: ScrapyのSpiderオブジェクト
         """
         self.conn = mysql.connector.connect(username=self.DATABASE_USER, password=self.DATABASE_PASSWORD,
-                                       host='localhost', database=self.DATABASE_NAME)
+                                       host=self.DATABASE_HOST, database=self.DATABASE_NAME)
         self.cursor = self.conn.cursor(buffered=True)
 
     def process_item(self, item, spider):
         """
-        成績をSQLite3に保存
+        成績をMySQLに保存
         :param item: Itemの名前
         :param spider: ScrapyのSpiderオブジェクト
         :return: Item
@@ -210,7 +217,7 @@ class BaseballPipeline(object):
             # 打者成績
             self.cursor.execute(self.INSERT_BATTER,(
                 item['year'], item['name'], item['team'], item['bat'], item['games'], item['pa'], item['ab'], item['r'],
-                item['h'], item['double'], item['triple'], item['hr'], item['tb'], item['rbi'], item['so'], item['bb'],
+                item['h'], item['single'], item['double'], item['triple'], item['hr'], item['tb'], item['rbi'], item['so'], item['bb'],
                 item['ibb'], item['hbp'], item['sh'], item['sf'], item['sb'], item['cs'], item['dp'], item['ba'],
                 item['slg'], item['obp'], item['ops'], item['rc'], item['rc27'],
             ))

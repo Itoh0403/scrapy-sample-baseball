@@ -5,6 +5,7 @@ from baseball.items import BatterItem
 from baseball.spiders import TEAMS, LEAGUE_TOP, BAT_RIGHT, BAT_LEFT, BAT_SWITCH
 from baseball.spiders import BaseballSpidersUtil as Util
 from sabr.stats import Stats
+import baseball.baseball.mySabr as ms
 import numpy as np
 
 
@@ -59,10 +60,11 @@ class BatterSpider(scrapy.Spider):
             item['ba'] = Util.text2digit(tr.xpath('td[22]/text()').extract_first(), digit_type=float)
             item['slg'] = Util.text2digit(tr.xpath('td[23]/text()').extract_first(), digit_type=float)
             item['obp'] = Util.text2digit(tr.xpath('td[24]/text()').extract_first(), digit_type=float)
+            item['single'] = ms.single(item['h'], item['double'], item['triple'], item['hr'])
             item['ops'] = item['slg'] + item['obp']
             if item['pa'] != 0:
                 item['rc'] = Stats.rc(item['tb'], item['h'], item['bb'], item['hbp'], item['cs'], item['dp'], item['sf'],
-                                      item['sh'], item['sb'], item['so'], item['ab'], item["ibb"])
+                                        item['sh'], item['sb'], item['so'], item['ab'], item["ibb"])
                 item['rc27'] = Stats.rc27(item['rc'], item['ab'], item["h"], item['sh'], item['sf'], item['cs'], item['dp'])
             else:
                 item['rc'] = 0
