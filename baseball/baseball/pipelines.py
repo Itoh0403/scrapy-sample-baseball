@@ -122,7 +122,7 @@ class BaseballPipeline(object):
     update_date
     ) 
     values(
-    %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+    %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
     now(), 
     now()
     )
@@ -167,7 +167,47 @@ class BaseballPipeline(object):
     )
     """
 
-    DATABASE_NAME = 'baseball'
+    UPDATE_BATTER = """
+    update batter set 
+    team = %s, 
+    games = %s, 
+    pa = %s, 
+    ab = %s, 
+    r = %s, 
+    h = %s, 
+    single = %s, 
+    doub = %s, 
+    triple = %s, 
+    hr = %s, 
+    tb = %s, 
+    rbi = %s, 
+    so = %s, 
+    bb = %s, 
+    ibb = %s, 
+    hbp = %s, 
+    sh = %s, 
+    sf = %s,
+    sb = %s,
+    cs = %s,
+    dp = %s,
+    ba = %s,
+    slg = %s,
+    obp = %s,
+    ops = %s,
+    rc = %s,
+    rc27 = %s,
+    update_date = now()
+    """
+
+    CHECK_NAME_BATTER = """
+    select * from batter where name=%s and year=%s
+    """
+
+    CHECK_NAME_PITCHER = """
+    select * from pitcher where name=%s and year=%s
+    """
+
+    DATABASE_NAME = 'baseball_test'
     # DATABASE_NAME = os.environ.get('DB_NAME')
     DATABASE_USER = os.environ.get('MYSQL_USER')
     # DATABASE_USER = os.environ.get('DB_USER')
@@ -215,12 +255,24 @@ class BaseballPipeline(object):
         # Spiderの名前で投入先のテーブルを判断
         if spider.name == 'batter':
             # 打者成績
-            self.cursor.execute(self.INSERT_BATTER,(
-                item['year'], item['name'], item['team'], item['bat'], item['games'], item['pa'], item['ab'], item['r'],
-                item['h'], item['single'], item['double'], item['triple'], item['hr'], item['tb'], item['rbi'], item['so'], item['bb'],
-                item['ibb'], item['hbp'], item['sh'], item['sf'], item['sb'], item['cs'], item['dp'], item['ba'],
-                item['slg'], item['obp'], item['ops'], item['rc'], item['rc27'],
-            ))
+            self.cursor.execute(self.CHECK_NAME_BATTER, (item['name'], item['year']))
+            isName = self.cursor.fetchone()
+            if isName is None:
+                print("Insert")
+                self.cursor.execute(self.INSERT_BATTER,(
+                    item['year'], item['name'], item['team'], item['bat'], item['games'], item['pa'], item['ab'], item['r'],
+                    item['h'], item['single'], item['double'], item['triple'], item['hr'], item['tb'], item['rbi'], item['so'], item['bb'],
+                    item['ibb'], item['hbp'], item['sh'], item['sf'], item['sb'], item['cs'], item['dp'], item['ba'],
+                    item['slg'], item['obp'], item['ops'], item['rc'], item['rc27'],
+                ))
+            else:
+                print("Update")
+                self.cursor.execute(self.UPDATE_BATTER, (
+                    item['team'], item['games'], item['pa'], item['ab'], item['r'],
+                    item['h'], item['single'], item['double'], item['triple'], item['hr'], item['tb'], item['rbi'], item['so'], item['bb'],
+                    item['ibb'], item['hbp'], item['sh'], item['sf'], item['sb'], item['cs'], item['dp'], item['ba'],
+                    item['slg'], item['obp'], item['ops'], item['rc'], item['rc27'],
+                ))
         elif spider.name == 'pitcher':
             # 投手成績
             self.cursor.execute(self.INSERT_PITCHER,(

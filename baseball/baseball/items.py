@@ -18,6 +18,7 @@ class BatterItem(Item):
     ab = Field()        # 打数
     r = Field()         # 得点
     h = Field()         # 安打
+    single = Field()    # 単打
     double = Field()    # 二塁打
     triple = Field()    # 三塁打
     hr = Field()        # 本塁打

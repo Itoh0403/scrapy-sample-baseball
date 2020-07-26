@@ -5,7 +5,7 @@ from baseball.items import BatterItem
 from baseball.spiders import TEAMS, LEAGUE_TOP, BAT_RIGHT, BAT_LEFT, BAT_SWITCH
 from baseball.spiders import BaseballSpidersUtil as Util
 from sabr.stats import Stats
-import baseball.baseball.mySabr as ms
+import baseball.mySabr as ms
 import numpy as np
 
 
