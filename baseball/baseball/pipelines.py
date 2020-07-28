@@ -196,7 +196,38 @@ class BaseballPipeline(object):
     ops = %s,
     rc = %s,
     rc27 = %s,
+    update_date = now() 
+    where name =%s and year=%s
+    """
+
+    UPDATE_PITCHER = """
+    update pitcher set
+    team = %s, 
+    games = %s, 
+    w = %s, 
+    l = %s, 
+    sv = %s, 
+    hld = %s, 
+    hp = %s, 
+    cg = %s, 
+    sho = %s, 
+    non_bb = %s, 
+    w_per = %s, 
+    bf = %s, 
+    ip = %s, 
+    h = %s, 
+    hr = %s, 
+    bb = %s, 
+    ibb = %s, 
+    hbp = %s, 
+    so = %s,
+    wp = %s,
+    bk = %s,
+    r = %s,
+    er = %s,
+    era = %s,
     update_date = now()
+    where name =%s and year=%s
     """
 
     CHECK_NAME_BATTER = """
@@ -271,16 +302,29 @@ class BaseballPipeline(object):
                     item['team'], item['games'], item['pa'], item['ab'], item['r'],
                     item['h'], item['single'], item['double'], item['triple'], item['hr'], item['tb'], item['rbi'], item['so'], item['bb'],
                     item['ibb'], item['hbp'], item['sh'], item['sf'], item['sb'], item['cs'], item['dp'], item['ba'],
-                    item['slg'], item['obp'], item['ops'], item['rc'], item['rc27'],
+                    item['slg'], item['obp'], item['ops'], item['rc'], item['rc27'], item['name'], item['year'],
                 ))
         elif spider.name == 'pitcher':
             # 投手成績
-            self.cursor.execute(self.INSERT_PITCHER,(
-                item['year'], item['name'], item['team'], item['throw'], item['games'], item['w'], item['l'],
-                item['sv'], item['hld'], item['hp'], item['cg'], item['sho'], item['non_bb'], item['w_per'], item['bf'],
-                item['ip'], item['h'], item['hr'], item['bb'], item['ibb'], item['hbp'], item['so'], item['wp'],
-                item['bk'], item['r'], item['er'], item['era'],
-            ))
+            self.cursor.execute(self.CHECK_NAME_PITCHER, (item['name'], item['year']))
+            isName = self.cursor.fetchone()
+            # print(isName)
+            if isName is None:
+                print("Insert")
+                self.cursor.execute(self.INSERT_PITCHER,(
+                    item['year'], item['name'], item['team'], item['throw'], item['games'], item['w'], item['l'],
+                    item['sv'], item['hld'], item['hp'], item['cg'], item['sho'], item['non_bb'], item['w_per'], item['bf'],
+                    item['ip'], item['h'], item['hr'], item['bb'], item['ibb'], item['hbp'], item['so'], item['wp'],
+                    item['bk'], item['r'], item['er'], item['era'],
+                ))
+            else:
+                print("Update")
+                self.cursor.execute(self.UPDATE_PITCHER,(
+                    item['team'], item['games'], item['w'], item['l'],
+                    item['sv'], item['hld'], item['hp'], item['cg'], item['sho'], item['non_bb'], item['w_per'], item['bf'],
+                    item['ip'], item['h'], item['hr'], item['bb'], item['ibb'], item['hbp'], item['so'], item['wp'],
+                    item['bk'], item['r'], item['er'], item['era'], item['name'], item['year'],
+                ))
         else:
             raise DropItem('spider not found')
         self.conn.commit()

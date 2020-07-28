@@ -118,15 +118,15 @@ def league_series_bat(df_bat, league, year):
     league_list = ["Central", "Pacific"]
     sr_league = pd.Series(
         [year, league_list[league], league_list[league], "T", 143 * 6, leaguesum(df_bat, "pa")[league],
-         leaguesum(df_bat, "ab")[league],
-         leaguesum(df_bat, "r")[league], leaguesum(df_bat, "h")[league], leaguesum(df_bat, "doub")[league],
+         leaguesum(df_bat, "ab")[league], leaguesum(df_bat, "r")[league],
+         leaguesum(df_bat, "h")[league], leaguesum(df_bat, "single")[league], leaguesum(df_bat, "doub")[league],
          leaguesum(df_bat, "triple")[league], leaguesum(df_bat, "hr")[league], leaguesum(df_bat, "tb")[league],
          leaguesum(df_bat, "rbi")[league], leaguesum(df_bat, "so")[league], leaguesum(df_bat, "bb")[league],
          leaguesum(df_bat, "ibb")[league],
          leaguesum(df_bat, "hbp")[league], leaguesum(df_bat, "sh")[league], leaguesum(df_bat, "sf")[league],
          leaguesum(df_bat, "sb")[league],
-         leaguesum(df_bat, "cs")[league], leaguesum(df_bat, "dp")[league]], index=df_bat.columns[:23])
-    sr_league["single"] = int(leaguesum(df_bat, "single")[league])
+         leaguesum(df_bat, "cs")[league], leaguesum(df_bat, "dp")[league]], index=df_bat.columns[:24])
+    # sr_league["single"] = int(leaguesum(df_bat, "single")[league])
     sr_league["ba"] = np.round(sr_league["h"]/sr_league["ab"], 4)
     sr_league["slg"] = np.round(sr_league["tb"] / sr_league["ab"], 4)
     sr_league["obp"] = np.round((sr_league["h"] + sr_league["bb"] + sr_league["hbp"]) / sr_league["pa"], 4)
@@ -138,7 +138,6 @@ def league_series_bat(df_bat, league, year):
 def calculate_sabr(df_bat, df_pitcher, year):
     df_bat = df_bat[df_bat["year"] == year]
     df_pitch = df_pitcher[df_pitcher["year"] == year]
-    df_bat = df_single(df_bat)
     df_bat = add_isPitcher(df_bat, df_pitch)
     df_bat = df_bat.query("ab > 0")
     df_bat = df_woba(df_bat)
