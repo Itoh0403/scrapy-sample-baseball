@@ -32,7 +32,11 @@ def woba(bb, hbp, single, double, triple, hr, ab, sf):
     u_double = 1.334
     u_triple = 1.725
     u_hr = 2.065
-    return (u_bb*bb + u_hbp*hbp + u_single*single + u_double*double + u_triple*triple + u_hr*hr)/(ab + bb + hbp + sf)
+    if ab + bb + hbp + sf == 0:
+        woba = 0.0
+    else:
+        woba = (u_bb*bb + u_hbp*hbp + u_single*single + u_double*double + u_triple*triple + u_hr*hr)/(ab + bb + hbp + sf)
+    return woba
 
 
 def sr_woba(sr_bat):
@@ -42,7 +46,7 @@ def sr_woba(sr_bat):
 
 def df_woba(df_bat):
     for index, row in df_bat.iterrows():
-        df_bat.loc[index, "wOBA"] = sr_woba(row)
+        df_bat.loc[index, "wOBA"] = np.round(sr_woba(row), 4)
     return df_bat
 
 
