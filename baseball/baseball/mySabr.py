@@ -129,7 +129,9 @@ def league_series_bat(df_bat, league, year):
          leaguesum(df_bat, "ibb")[league],
          leaguesum(df_bat, "hbp")[league], leaguesum(df_bat, "sh")[league], leaguesum(df_bat, "sf")[league],
          leaguesum(df_bat, "sb")[league],
-         leaguesum(df_bat, "cs")[league], leaguesum(df_bat, "dp")[league]], index=df_bat.columns[:24])
+         leaguesum(df_bat, "cs")[league], leaguesum(df_bat, "dp")[league]],
+         index=["year", "name", "team", "bat", "games", "pa", "ab", "r", "h", "single", "doub", "triple",
+                "hr", "tb", "rbi", "so", "bb", "ibb", "hbp", "sh", "sf", "sb", "cs", "dp"])
     # sr_league["single"] = int(leaguesum(df_bat, "single")[league])
     sr_league["ba"] = np.round(sr_league["h"]/sr_league["ab"], 4)
     sr_league["slg"] = np.round(sr_league["tb"] / sr_league["ab"], 4)

@@ -238,16 +238,29 @@ class BaseballPipeline(object):
     select * from pitcher where name=%s and year=%s
     """
 
-    DATABASE_NAME = 'baseball_test'
-    # DATABASE_NAME = os.environ.get('DB_NAME')
-    DATABASE_USER = os.environ.get('MYSQL_USER')
-    # DATABASE_USER = os.environ.get('DB_USER')
-    DATABASE_PASSWORD = os.environ.get('MYSQL_PASSWORD')
-    # DATABASE_PASSWORD = os.environ.get('DB_PASSWORD')
-    DATABASE_HOST = 'localhost'
-    # DATABASE_HOST = os.environ.get('DB_HOSTNAME')
-    conn = None
+    # DATABASE_NAME = 'baseball_2020'
+    # # DATABASE_NAME = os.environ.get('DB_NAME')
+    # DATABASE_USER = os.environ.get('MYSQL_USER')
+    # # DATABASE_USER = os.environ.get('DB_USER')
+    # DATABASE_PASSWORD = os.environ.get('MYSQL_PASSWORD')
+    # # DATABASE_PASSWORD = os.environ.get('DB_PASSWORD')
+    # DATABASE_HOST = 'localhost'
+    # # DATABASE_HOST = os.environ.get('DB_HOSTNAME')
 
+    is_product = True
+    DATABASE_USER = os.environ.get("MYSQL_USER")
+    DATABASE_PASSWORD = os.environ.get("MYSQL_PASSWORD")
+    DATABASE_HOST = 'localhost'
+    DATABASE_NAME = 'baseball_2020'
+    
+    if is_product:
+        DATABASE_USER = os.environ.get("DB_USERNAME")
+        DATABASE_PASSWORD = os.environ.get("DB_PASSWORD")
+        DATABASE_HOST = os.environ.get("DB_HOSTNAME")
+        DATABASE_NAME = os.environ.get("DB_NAME")
+    
+    conn = None
+    
     def __init__(self):
         """
         Tableの有無をチェック,無ければ作る
